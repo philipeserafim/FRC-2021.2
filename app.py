@@ -2,13 +2,13 @@ import os
 import random
 import threading
 from client import Client
+from room import Room
 from server import Server
 
-class SalaBatePapo:
+class Application:
   def __init__(self, host, port):
     self.host = host
     self.port = port
-    self.rooms_list = []
   
   def run(self):
     while True:
@@ -30,18 +30,22 @@ class SalaBatePapo:
         self.joinRoom()
 
   def createRoom(self, titulo, max_clients):
-    # Criar um servidor
-    server = Server(titulo, self.host, self.port, max_clients)
+    # Criar uma sala
+    room = Room(titulo, self.host, self.port, max_clients)
 
-    # Colocar servidor na lista
-    self.rooms_list.append(server)
-    thread = threading.Thread(target = server.run)
+    # Roda a sala em uma outra thread
+    thread = threading.Thread(target = room.run)
     thread.start()
 
-    server_host, server_port = server.get_network()
-    client = Client(server_host, server_port)
+    # Conectando com a sala
+    self.connectToRoom(self.host, self.port)
+    
+
+  def connectToRoom(host, port):
+    # Conecta a sala
+    client = Client(host, port)
     client.run()
-    return
+
   
   def joinRoom(self):
     resp_host = input("Digite o ip do host: ")
@@ -56,5 +60,7 @@ class SalaBatePapo:
 
 port = random.randint(0, 9999)
 
-sala = SalaBatePapo('127.0.0.1', port)
-sala.run()
+server = Server('127.0.0.1', 5000)
+app = Application('127.0.0.1', port)
+
+app.run()
