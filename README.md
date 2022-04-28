@@ -7,7 +7,12 @@
 
 ## Execução
 
-Para executar o programa basta utilizar o comando
+Para levantar o servidor primeiro é necessário rodar o comando:
 ```
-python sala.py
+python server.py
+```
+
+e após isso o programa irá rodar com: 
+```
+python main.py
 ```

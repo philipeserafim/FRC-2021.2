@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 import os
 import socket
 import sys
@@ -7,7 +8,34 @@ class Client:
   def __init__(self, host, port):
     self.HOST = host
     self.PORT = port
+    self.stop = False
+    
 
+  def start_room(self):
+    # Cria conexao TCP
+    self.cria_conexao_tcp()
+
+    # Roda uma thread para ficar escutando as mensagens que o client receber
+    thread = threading.Thread(target = self.receber_mensagem)
+    thread.start()
+
+    # Envia mensagens na thread principal
+    self.send_message_room()
+
+  def send_to_server(self, message):
+    # Cria conexao TCP
+    self.cria_conexao_tcp()
+
+    self.socket.send(message.encode('utf-8'))
+    received_message = self.socket.recv(4096).decode('utf-8')
+    self.socket.close()
+
+    if (message.split(':'))[0] == '/get_room' and received_message != 'error: opcao invalida':
+      return received_message
+    else:
+      print(received_message)
+
+  
   def cria_conexao_tcp(self):
     try:
       self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,37 +45,37 @@ class Client:
       print("Não foi possível encontrar sala")
       sys.exit()
 
-  def enviar_mensagem(self):
+  def send_message_room(self):
     try:
       while True:
         msg = input()
         self.socket.send(msg.encode('utf-8'))
 
-        if msg == '/exit': 
+        if msg == '/shutdown': 
           print("Saindo do bate papo...")
           self.socket.close()
           os._exit(1)
     except:
-      print("Ocorreu um erro")
+      self.socket.send("/exit".encode('utf-8'))
       self.socket.close()
       os._exit(1)
   
   def receber_mensagem(self):
-    while True:
-      msg = self.socket.recv(2048).decode('utf-8')
+    try: 
+      while True:
+        msg = self.socket.recv(4096).decode('utf-8')
 
-      if msg == '/servidor_off': 
-        print("Encerrando conexão...")
-        self.socket.close()
-        os._exit(1)
+        if msg == '/shutdown': 
+          print("Encerrando conexão...")
+          self.socket.close()
+          os._exit(1)
+        print(msg)
+  
+    except: 
+      print("Encerrando conexão...")
+      self.socket.close()
+      os._exit(1)
 
-      print(msg)
-
-  def run(self):
-    self.cria_conexao_tcp()
-    thread = threading.Thread(target = self.receber_mensagem)
-    thread.start()
-    self.enviar_mensagem()
 
 # client = Client('127.0.0.1', 5000)
 # client.run()
