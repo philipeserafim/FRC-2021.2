@@ -1,19 +1,17 @@
 import os
-import random
 import threading
 from client import Client
 from room import Room
-from server import Server
 
 class Application:
-  def __init__(self, host, port):
-    self.host = host
-    self.port = port
+  def __init__(self, client_host, server_host):
+    self.client_host = client_host
+    self.server_host = server_host
   
   def run(self):
     while True:
       print("1 - Criar uma sala")
-      print("2 - Entrar em uma sala existente")
+      print("2 - Entrar em uma sala")
       print("0 - Sair do programa")
 
       resp = int(input("Selecione uma opção: "))
@@ -22,45 +20,53 @@ class Application:
         os._exit(0)
 
       if resp == 1:
-        titulo = input("Escreva o nome da sua sala de bate papo: ")
+        title = input("Escreva o nome da sua sala de bate papo: ")
         max_clients = int(input("Qual vai ser o limite máximo de participantes? "))
-        self.createRoom(titulo, max_clients)
+        self.create_room(title, max_clients)
          
       if resp == 2:
-        self.joinRoom()
+        print("========= Salas Disponíveis ==========")
+        self.list_rooms()
+        print("======================================")
+        self.get_room_ip()
 
-  def createRoom(self, titulo, max_clients):
-    # Criar uma sala
-    room = Room(titulo, self.host, self.port, max_clients)
+  def create_room(self, title, max_clients):
+    # Cria sala com titulo, cliente, servidor, max_clientes
+    room = Room(title, self.client_host, self.server_host, max_clients)
 
     # Roda a sala em uma outra thread
     thread = threading.Thread(target = room.run)
     thread.start()
 
-    # Conectando com a sala
-    self.connectToRoom(self.host, self.port)
-    
-
-  def connectToRoom(host, port):
-    # Conecta a sala
+    # Criando client com host para room
+    host, port = self.client_host
     client = Client(host, port)
-    client.run()
 
-  
-  def joinRoom(self):
-    resp_host = input("Digite o ip do host: ")
-    resp_port = int(input("Digite a porta: "))
+    # Conecta o client com a Room
+    client.start_room()
 
-    client = Client(resp_host, resp_port)
-    client.run()  
-  
-  def leftRoom(self):
-    # Deixar um servidor
-    ...
+  def list_rooms(self):
+    # Criando client com host para server
+    host, port = self.server_host
+    client = Client(host, port)
 
-port = random.randint(0, 9999)
+    # Pede para o servidor listar as salas criadas
+    client.send_to_server('/list_rooms')
 
-server = Server('127.0.0.1', 5000)
-app = Application('127.0.0.1', port)
+  def get_room_ip(self):
+    selected_room = int(input("Digite a sala que deseja entrar: "))
+    # Criando client com host para server
+    host, port = self.server_host
+    client = Client(host, port)
 
-app.run()
+    # Pede para o servidor pegar o ip de uma sala
+    received_room = client.send_to_server(f"/get_room:{selected_room}")
+    room = received_room.split(':')
+
+    self.join_room(room)
+
+  def join_room(self, room):
+    client = Client(room[0], int(room[1]))
+    client.start_room()
+
+
