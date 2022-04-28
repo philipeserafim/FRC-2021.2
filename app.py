@@ -61,9 +61,11 @@ class Application:
 
     # Pede para o servidor pegar o ip de uma sala
     received_room = client.send_to_server(f"/get_room:{selected_room}")
-    room = received_room.split(':')
-
-    self.join_room(room)
+    try: 
+      room = received_room.split(':')
+      self.join_room(room)
+    except AttributeError:
+      return
 
   def join_room(self, room):
     client = Client(room[0], int(room[1]))

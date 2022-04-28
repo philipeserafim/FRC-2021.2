@@ -1,3 +1,4 @@
+from asyncio.windows_events import NULL
 import os
 import socket
 import threading
@@ -26,7 +27,7 @@ class Client:
     received_message = self.socket.recv(4096).decode('utf-8')
     self.socket.close()
 
-    if (message.split(':'))[0] == '/get_room':
+    if (message.split(':'))[0] == '/get_room' and received_message != 'error: opcao invalida':
       return received_message
     else:
       print(received_message)

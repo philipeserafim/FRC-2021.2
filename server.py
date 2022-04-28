@@ -50,29 +50,35 @@ class Server:
   
   def checar_comando(self, client_socket):
     # Pega o comando recebido da Room
-
-    command = (client_socket.recv(1024).decode('utf-8')).split(':')
+    message = client_socket.recv(1024).decode('utf-8')
+    command = message.split(':')
 
     if command[0] == '/shutdown':
       print('Fechar do servidor')
 
     if command[0] == '/add_room':
-      room = command[1:4]
-      self.rooms_list.append(room)
-      print(f"servidor: {room}")
+      room = ':'.join(command[1:4])
+
+      if not room in self.rooms_list:
+        self.rooms_list.append(room)
+        print(f"servidor: {room}")
     
     if command[0] == '/get_room':
       index = int(command[1])
-      room = self.rooms_list[index]
-      room = ':'.join(room[1:3])
-      client_socket.send(f"{room}".encode('utf-8'))
+
+      try:
+        room = self.rooms_list[index].split(':')
+        room = ':'.join(room[1:3])
+        client_socket.send(f"{room}".encode('utf-8'))
+      except IndexError:
+        client_socket.send("error: opcao invalida".encode('utf-8'))
 
 
     if command[0] == '/list_rooms':
       rooms = []
 
       for index in range(len(self.rooms_list)):
-        room_name = self.rooms_list[index][0]
+        room_name = self.rooms_list[index].split(':')[0]
         rooms.append(f"{index} - {room_name}")
 
       rooms = '\n'.join(rooms)
