@@ -1,12 +1,15 @@
-from asyncio.windows_events import NULL
+from concurrent.futures import thread
 import os
 import socket
+import sys
 import threading
 
 class Client:
   def __init__(self, host, port):
     self.HOST = host
     self.PORT = port
+    self.stop = False
+    
 
   def start_room(self):
     # Cria conexao TCP
@@ -40,7 +43,7 @@ class Client:
       self.socket.connect(server)
     except:
       print("Não foi possível encontrar sala")
-      os._exit(0)
+      sys.exit()
 
   def send_message_room(self):
     try:
@@ -48,25 +51,30 @@ class Client:
         msg = input()
         self.socket.send(msg.encode('utf-8'))
 
-        if msg == '/exit': 
+        if msg == '/shutdown': 
           print("Saindo do bate papo...")
           self.socket.close()
           os._exit(1)
     except:
-      print("Ocorreu um erro")
+      self.socket.send("/exit".encode('utf-8'))
       self.socket.close()
       os._exit(1)
   
   def receber_mensagem(self):
-    while True:
-      msg = self.socket.recv(4096).decode('utf-8')
+    try: 
+      while True:
+        msg = self.socket.recv(4096).decode('utf-8')
 
-      if msg == '/shutdown': 
-        print("Encerrando conexão...")
-        self.socket.close()
-        os._exit(0)
-
-      print(msg)
+        if msg == '/shutdown': 
+          print("Encerrando conexão...")
+          self.socket.close()
+          os._exit(1)
+        print(msg)
+  
+    except: 
+      print("Encerrando conexão...")
+      self.socket.close()
+      os._exit(1)
 
 
 # client = Client('127.0.0.1', 5000)

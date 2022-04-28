@@ -21,7 +21,7 @@ class Application:
 
       if resp == 1:
         title = input("Escreva o nome da sua sala de bate papo: ")
-        max_clients = int(input("Qual vai ser o limite máximo de participantes? "))
+        max_clients = input("Qual vai ser o limite máximo de participantes? ")
         self.create_room(title, max_clients)
          
       if resp == 2:
@@ -32,7 +32,7 @@ class Application:
 
   def create_room(self, title, max_clients):
     # Cria sala com titulo, cliente, servidor, max_clientes
-    room = Room(title, self.client_host, self.server_host, max_clients)
+    room = Room(title, self.client_host, self.server_host, int(max_clients))
 
     # Roda a sala em uma outra thread
     thread = threading.Thread(target = room.run)

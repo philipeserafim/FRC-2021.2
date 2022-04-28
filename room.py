@@ -47,24 +47,22 @@ class Room():
       os._exit(1)
     
     self.socket_host.listen(self.max_clients)
+    
 
   def aceita_conexao_clients(self):
     while True:
-      # 
       client, client_address = self.socket_host.accept()
-
       thread_client = threading.Thread(target = self.controla_conexao_client, args = (client, ))
       thread_client.start()
-
+  
   def controla_conexao_client(self, client):
-    user = self.create_nickname(client)
 
-    self.connected_clients.append(user)
+      user = self.create_nickname(client)
+      self.connected_clients.append(user)
 
-    client.send((f"Bem vindo ao bate papo {self.name}!").encode('utf-8'))
-
-    self.no_tag_message(f"{user.nickname} entrou na sala!", user)
-    self.receber_mensagem(user)
+      client.send((f"Bem vindo ao bate papo {self.name}!").encode('utf-8'))
+      self.no_tag_message(f"{user.nickname} entrou na sala!", user)
+      self.receber_mensagem(user)
 
   def create_nickname(self, client): 
     message = f"Para entrar no bate papo deve primeiro digitar seu apelido: "
@@ -98,13 +96,8 @@ class Room():
       nickname = client.recv(1024).decode('utf-8')    
       has_nickname = self.checar_nickname(nickname)
 
-
     user = User(nickname, client)
     self.connected_clients.append(user)
-
-    message = f"Bem vindo ao bate papo {self.name}! Convide seus amigos, ip: {self.HOST}, porta: {self.PORT}"
-
-    client.send(message.encode('utf-8'))
 
     self.no_tag_message(f"{user.nickname} entrou na sala!", user)
     self.receber_mensagem(user)
@@ -148,8 +141,6 @@ class Room():
           user.client.close()
           self.connected_clients.remove(user)
           return
-        
-        
         
         if msg == '/close_room':
           message = f"/close_room:{self.name}"

@@ -54,7 +54,7 @@ class Server:
     command = message.split(':')
 
     if command[0] == '/shutdown':
-      print('Fechar do servidor')
+      self.socket.close()
 
     if command[0] == '/add_room':
       room = ':'.join(command[1:4])
