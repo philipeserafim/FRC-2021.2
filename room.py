@@ -1,6 +1,7 @@
 import os
 import socket 
 import threading
+import time
 from user import User
 
 class Room():
@@ -39,9 +40,11 @@ class Room():
   def cria_conexao_TCP(self):   
     self.socket_host = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.socket_host.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
     try:
       self.socket_host.bind(self.host)
+      message = '/get_room_id'
+      self.server_socket.send(message.encode('utf-8'))
+      self.room_id = int(self.server_socket.recv(1024).decode('utf-8'))
     except:
       print("Bind falhou")
       os._exit(1)
@@ -140,13 +143,11 @@ class Room():
           self.no_tag_message(f"{user.nickname} saiu do bate papo!", user)
           user.client.close()
           self.connected_clients.remove(user)
+          if(len(self.connected_clients) == 0):
+            message = f"/close_room:{self.room_id}"
+            self.server_socket.send(message.encode('utf-8'))
           return
-        
-        if msg == '/close_room':
-          message = f"/close_room:{self.name}"
-          self.server_socket.send(message.encode('utf-8'))
 
-        else:
-          self.enviar_mensagem(msg, user)
+        self.enviar_mensagem(msg, user)
       except:
         break

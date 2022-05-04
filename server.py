@@ -1,6 +1,8 @@
+from http import client
 import os
 import socket 
 import threading
+import time
 class Server:
   def __init__(self, host, port):
     self.HOST = host
@@ -27,7 +29,6 @@ class Server:
     
     self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
     try:
       self.socket.bind(server)
     except:
@@ -54,6 +55,7 @@ class Server:
     command = message.split(':')
 
     if command[0] == '/shutdown':
+      
       self.socket.close()
 
     if command[0] == '/add_room':
@@ -73,6 +75,9 @@ class Server:
       except IndexError:
         client_socket.send("error: opcao invalida".encode('utf-8'))
 
+    if command[0] == '/get_room_id':
+      message = len(self.rooms_list)
+      client_socket.send(message.encode('utf-8'))
 
     if command[0] == '/list_rooms':
       rooms = []
@@ -86,7 +91,9 @@ class Server:
       # print(f"{rooms}")
 
     if command[0] == '/close_room':
+      del self.rooms_list[int(command[1])]
       print('Remover room na lista de rooms')
+
 
 
   def controla_conexao(self, client):

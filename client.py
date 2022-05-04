@@ -3,6 +3,7 @@ import os
 import socket
 import sys
 import threading
+import time
 
 class Client:
   def __init__(self, host, port):
@@ -41,7 +42,8 @@ class Client:
       self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       server = (self.HOST, self.PORT)
       self.socket.connect(server)
-    except:
+    except Exception as e:
+      print(e)
       print("Não foi possível encontrar sala")
       sys.exit()
 
