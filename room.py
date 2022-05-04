@@ -31,7 +31,7 @@ class Room():
       host_ip, host_port = self.host
 
       # Manda a room criada com o ip para o servidor principal
-      message = f"/add_room:{self.name}:{host_ip}:{host_port}"
+      message = f"/add_room:{self.name}:{host_ip}:{host_port}:{self.max_clients}"
       self.server_socket.send(message.encode('utf-8'))
     except:
       print("Falha de conexão com o servidor")
@@ -141,7 +141,6 @@ class Room():
           self.connected_clients.remove(user)
 
           if(len(self.connected_clients) == 0):
-            print('entrei')
             host_ip, host_port = self.host
             message = f"/close_room:{self.name}:{host_ip}:{host_port}"
             self.server_socket.send(message.encode('utf-8'))

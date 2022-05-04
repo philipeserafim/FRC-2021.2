@@ -60,10 +60,12 @@ class Server:
 
     if command[0] == '/add_room':
       room = ':'.join(command[1:4])
-
+      print(room)
       if not room in self.rooms_list:
+        qtd_clients = len(self.rooms_list)
+        print(f"servidor: {room} | max clients: {command[4]}")
+        room = ':'.join(command[1:5])
         self.rooms_list.append(room)
-        print(f"servidor: {room}")
     
     if command[0] == '/get_room':
       index = int(command[1])
