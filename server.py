@@ -91,8 +91,9 @@ class Server:
       # print(f"{rooms}")
 
     if command[0] == '/close_room':
-      del self.rooms_list[int(command[1])]
-      print('Remover room na lista de rooms')
+      room = ':'.join(command[1:4])
+      self.rooms_list.remove(room)
+      print(f"closed_room: {room}")
 
 
 

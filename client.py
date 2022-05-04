@@ -51,12 +51,13 @@ class Client:
     try:
       while True:
         msg = input()
+
         self.socket.send(msg.encode('utf-8'))
 
-        if msg == '/shutdown': 
+        if msg == '/exit': 
           print("Saindo do bate papo...")
           self.socket.close()
-          os._exit(1)
+
     except:
       self.socket.send("/exit".encode('utf-8'))
       self.socket.close()
@@ -81,8 +82,4 @@ class Client:
 
 # client = Client('127.0.0.1', 5000)
 # client.run()
-
-
-
-
 

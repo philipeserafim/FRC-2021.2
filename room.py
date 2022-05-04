@@ -42,15 +42,11 @@ class Room():
     self.socket_host.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     try:
       self.socket_host.bind(self.host)
-      message = '/get_room_id'
-      self.server_socket.send(message.encode('utf-8'))
-      self.room_id = int(self.server_socket.recv(1024).decode('utf-8'))
     except:
       print("Bind falhou")
       os._exit(1)
     
     self.socket_host.listen(self.max_clients)
-    
 
   def aceita_conexao_clients(self):
     while True:
@@ -143,10 +139,13 @@ class Room():
           self.no_tag_message(f"{user.nickname} saiu do bate papo!", user)
           user.client.close()
           self.connected_clients.remove(user)
+
           if(len(self.connected_clients) == 0):
-            message = f"/close_room:{self.room_id}"
+            print('entrei')
+            host_ip, host_port = self.host
+            message = f"/close_room:{self.name}:{host_ip}:{host_port}"
             self.server_socket.send(message.encode('utf-8'))
-          return
+            return
 
         self.enviar_mensagem(msg, user)
       except:
