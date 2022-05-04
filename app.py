@@ -1,5 +1,6 @@
 import os
 import threading
+import time
 from client import Client
 from room import Room
 
@@ -11,7 +12,8 @@ class Application:
   def run(self):
     while True:
       print("1 - Criar uma sala")
-      print("2 - Entrar em uma sala")
+      print("2 - Listar salas")
+      print("3 - Entrar em uma sala")
       print("0 - Sair do programa")
 
       resp = int(input("Selecione uma opção: "))
@@ -23,8 +25,13 @@ class Application:
         title = input("Escreva o nome da sua sala de bate papo: ")
         max_clients = input("Qual vai ser o limite máximo de participantes? ")
         self.create_room(title, max_clients)
-         
+      
       if resp == 2:
+        print("========= Salas Disponíveis ==========")
+        self.list_rooms()
+        print("======================================")
+
+      if resp == 3:
         print("========= Salas Disponíveis ==========")
         self.list_rooms()
         print("======================================")
@@ -38,6 +45,7 @@ class Application:
     thread = threading.Thread(target = room.run)
     thread.start()
 
+    time.sleep(1)
     # Criando client com host para room
     host, port = self.client_host
     client = Client(host, port)
@@ -56,6 +64,7 @@ class Application:
   def get_room_ip(self):
     selected_room = int(input("Digite a sala que deseja entrar: "))
     # Criando client com host para server
+    time.sleep(1)
     host, port = self.server_host
     client = Client(host, port)
 
@@ -70,5 +79,3 @@ class Application:
   def join_room(self, room):
     client = Client(room[0], int(room[1]))
     client.start_room()
-
-

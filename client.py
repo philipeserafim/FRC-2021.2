@@ -3,6 +3,7 @@ import os
 import socket
 import sys
 import threading
+import time
 
 class Client:
   def __init__(self, host, port):
@@ -41,7 +42,8 @@ class Client:
       self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       server = (self.HOST, self.PORT)
       self.socket.connect(server)
-    except:
+    except Exception as e:
+      print(e)
       print("Não foi possível encontrar sala")
       sys.exit()
 
@@ -49,12 +51,13 @@ class Client:
     try:
       while True:
         msg = input()
+
         self.socket.send(msg.encode('utf-8'))
 
-        if msg == '/shutdown': 
+        if msg == '/exit': 
           print("Saindo do bate papo...")
           self.socket.close()
-          os._exit(1)
+
     except:
       self.socket.send("/exit".encode('utf-8'))
       self.socket.close()
@@ -79,8 +82,4 @@ class Client:
 
 # client = Client('127.0.0.1', 5000)
 # client.run()
-
-
-
-
 

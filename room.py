@@ -1,6 +1,7 @@
 import os
 import socket 
 import threading
+import time
 from user import User
 
 class Room():
@@ -30,7 +31,7 @@ class Room():
       host_ip, host_port = self.host
 
       # Manda a room criada com o ip para o servidor principal
-      message = f"/add_room:{self.name}:{host_ip}:{host_port}"
+      message = f"/add_room:{self.name}:{host_ip}:{host_port}:{self.max_clients}"
       self.server_socket.send(message.encode('utf-8'))
     except:
       print("Falha de conexão com o servidor")
@@ -39,7 +40,6 @@ class Room():
   def cria_conexao_TCP(self):   
     self.socket_host = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.socket_host.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-
     try:
       self.socket_host.bind(self.host)
     except:
@@ -47,7 +47,6 @@ class Room():
       os._exit(1)
     
     self.socket_host.listen(self.max_clients)
-    
 
   def aceita_conexao_clients(self):
     while True:
@@ -140,13 +139,13 @@ class Room():
           self.no_tag_message(f"{user.nickname} saiu do bate papo!", user)
           user.client.close()
           self.connected_clients.remove(user)
-          return
-        
-        if msg == '/close_room':
-          message = f"/close_room:{self.name}"
-          self.server_socket.send(message.encode('utf-8'))
 
-        else:
-          self.enviar_mensagem(msg, user)
+          if(len(self.connected_clients) == 0):
+            host_ip, host_port = self.host
+            message = f"/close_room:{self.name}:{host_ip}:{host_port}"
+            self.server_socket.send(message.encode('utf-8'))
+            return
+
+        self.enviar_mensagem(msg, user)
       except:
         break
